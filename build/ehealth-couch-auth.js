@@ -48,10 +48,7 @@ angular.module('ehealth.couch-auth', []).
           }
         }
       });
-}]);
-
-angular.module('ehealth.couch-auth')
-  .constant('AUTH_EVENTS', {
+}]).constant('AUTH_EVENTS', {
     login: {
       success: 'auth-login-success',
       failure: 'auth-login-failure'
@@ -64,9 +61,7 @@ angular.module('ehealth.couch-auth')
       success: 'auth-authenticated-success',
       failure: 'auth-authenticated-failure'
     }
-});
-
-angular.module('ehealth.couch-auth')
+}).module('ehealth.couch-auth')
   .factory('Auth', function Auth($sessionStorage, couchdb, $rootScope, $q, AUTH_EVENTS) {
 
     function set(user) {
