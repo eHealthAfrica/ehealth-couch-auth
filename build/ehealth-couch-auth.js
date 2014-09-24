@@ -5,11 +5,21 @@
 angular.module('ehealth.couch-auth', []).
   .constant('ehealth.couch-auth.config', {
       databaseName: '',
-      loginRedirect: '/',
-      logoutRedirect: '/',
-      loginUrl: '/auth/login'
   })
-  .provider('couchAuthProvider')
+ .provider('ehealth.couch-auth.config', function () {
+    // default values
+    var values = {
+      dbUrl: null
+    };
+    return {
+      set: function (constants) {
+        angular.extend(values, constants);
+      },
+      $get: function () {
+        return values;
+      }
+    };
+  })
   .factory('couchdb', ['$resource', 'ehealth.couch-auth.config', function ($resource, SETTINGS) {
     return $resource(SETTINGS.dbUrl + ':_db/:_action/:_param/:_sub/:_sub_param',
       {
