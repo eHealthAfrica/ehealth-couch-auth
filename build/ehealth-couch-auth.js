@@ -2,11 +2,11 @@
 
 'use strict';
 
-angular.module('ehealth.couch-auth', []).
-  .constant('ehealth.couch-auth.config', {
-      databaseName: '',
+angular.module('ehealth.couch-auth', [])
+  .value('config', {
+      values: {},
   })
- .provider('ehealth.couch-auth.config', function () {
+ .provider('couchAuth', function () {
     // default values
     var values = {
       dbUrl: null
@@ -20,8 +20,8 @@ angular.module('ehealth.couch-auth', []).
       }
     };
   })
-  .factory('couchdb', ['$resource', 'ehealth.couch-auth.config', function ($resource, SETTINGS) {
-    return $resource(SETTINGS.dbUrl + ':_db/:_action/:_param/:_sub/:_sub_param',
+  .factory('couchdb', ['$resource', 'couchAuth', function ($resource, couchAuth) {
+    return $resource(couchAuth.dbUrl + ':_db/:_action/:_param/:_sub/:_sub_param',
       {
         _db: '@_db'
       },
@@ -61,8 +61,7 @@ angular.module('ehealth.couch-auth', []).
       success: 'auth-authenticated-success',
       failure: 'auth-authenticated-failure'
     }
-}).module('ehealth.couch-auth')
-  .factory('Auth', function Auth($sessionStorage, couchdb, $rootScope, $q, AUTH_EVENTS) {
+}).factory('Auth', function Auth($sessionStorage, couchdb, $rootScope, $q, AUTH_EVENTS) {
 
     function set(user) {
       if (user !== self.currentUser) {
