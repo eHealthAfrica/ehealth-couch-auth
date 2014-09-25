@@ -9,7 +9,8 @@ angular.module('ehealth.couch-auth', [])
  .provider('couchAuth', function () {
     // default values
     var values = {
-      dbUrl: null
+      dbUrl: null,
+      dbName: null
     };
     return {
       set: function (constants) {
@@ -33,6 +34,21 @@ angular.module('ehealth.couch-auth', [])
             _db: '_session'
           }
         },
+        update: {
+          method: 'PUT'
+        },
+        view: {
+          method: 'GET',
+          withCredentials: true,
+          params: {
+            _action: '_design',
+            _sub: '_view'
+          }
+        },
+        get: {
+          method: 'GET',
+          withCredentials: true
+        },
         login: {
           method: 'POST',
           withCredentials: true,
@@ -48,6 +64,7 @@ angular.module('ehealth.couch-auth', [])
           }
         }
       });
+
 }]).constant('AUTH_EVENTS', {
     login: {
       success: 'auth-login-success',
@@ -61,7 +78,7 @@ angular.module('ehealth.couch-auth', [])
       success: 'auth-authenticated-success',
       failure: 'auth-authenticated-failure'
     }
-}).factory('Auth', function Auth($sessionStorage, couchdb, $rootScope, $q, AUTH_EVENTS) {
+}).factory('Auth', function Auth(couchAuth, $sessionStorage, couchdb, $rootScope, $q, AUTH_EVENTS) {
 
     function set(user) {
       if (user !== self.currentUser) {
@@ -97,12 +114,18 @@ angular.module('ehealth.couch-auth', [])
           password: user.password
         };
 
-        return couchdb.login(params).$promise
-          .then(function(res) {
+        return couchdb.login(params).$promise.then(function(res) {
             if (res.ok) {
-              set(user);
+              // Check next if allowed to connect to application database
+              return couchdb.get({_db: couchAuth.dbName}).$promise.then(function(res) {
+                set(user);
+                return $rootScope.$broadcast(AUTH_EVENTS.login.success);
+              });
+            }
+            else {
               return $rootScope.$broadcast(AUTH_EVENTS.login.success);
             }
+           
             $rootScope.$broadcast(AUTH_EVENTS.login.failure);
           })
           .catch(function() {
@@ -117,8 +140,7 @@ angular.module('ehealth.couch-auth', [])
        * @return {Promise}
        */
       logout: function() {
-        return couchdb.logout().$promise
-          .then(function(res) {
+        return couchdb.logout().$promise.then(function(res) {
             if (res.ok) {
               set(null);
               return $rootScope.$broadcast(AUTH_EVENTS.logout.success);
