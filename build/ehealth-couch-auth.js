@@ -35,7 +35,8 @@ angular.module('ehealth.couch-auth', [])
           }
         },
         update: {
-          method: 'PUT'
+          method: 'PUT',
+          withCredentials: true
         },
         view: {
           method: 'GET',
