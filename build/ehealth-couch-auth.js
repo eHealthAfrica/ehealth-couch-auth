@@ -1,12 +1,11 @@
 (function(window, angular, undefined) {
+  'use strict';
 
-'use strict';
-
-angular.module('ehealth.couch-auth', [])
-  .value('config', {
-      values: {},
-  })
- .provider('couchAuth', function () {
+  angular.module('ehealth.couch-auth', [])
+    .value('config', {
+        values: {},
+    })
+  .provider('couchAuth', function () {
     // default values
     var values = {
       dbUrl: null,
@@ -64,9 +63,9 @@ angular.module('ehealth.couch-auth', [])
             _db: '_session'
           }
         }
-      });
-
-}]).constant('AUTH_EVENTS', {
+      }
+    );
+  }]).constant('AUTH_EVENTS', {
     login: {
       success: 'auth-login-success',
       failure: 'auth-login-failure'
@@ -79,7 +78,8 @@ angular.module('ehealth.couch-auth', [])
       success: 'auth-authenticated-success',
       failure: 'auth-authenticated-failure'
     }
-}).factory('Auth', function Auth(couchAuth, $sessionStorage, couchdb, $rootScope, $q, AUTH_EVENTS) {
+  }).factory('Auth', ['couchAuth', 'couchdb', 'AUTH_EVENTS', '$sessionStorage', '$rootScope', '$q',
+                      function Auth(couchAuth, couchdb, AUTH_EVENTS, $sessionStorage, $rootScope, $q) {
 
     function set(user) {
       if (user !== self.currentUser) {
@@ -126,7 +126,7 @@ angular.module('ehealth.couch-auth', [])
             else {
               return $rootScope.$broadcast(AUTH_EVENTS.login.success);
             }
-           
+
             $rootScope.$broadcast(AUTH_EVENTS.login.failure);
           })
           .catch(function() {
@@ -172,6 +172,18 @@ angular.module('ehealth.couch-auth', [])
         return deferred.promise;
       }
     };
-  });
-
+  }]).factory('authErrorInterceptor', ['$injector', '$q', function authErrorInterceptor($injector, $q) {
+    return {
+      'responseError': function(error) {
+        // Auth has to be injected here to avoid circular dependencies
+        var Auth = $injector.get('Auth');
+        if (error.status === 401) {
+          Auth.logout();
+        }
+        return $q.reject(error);
+      }
+    }
+  }]).config(['$httpProvider', function($httpProvider) {
+    $httpProvider.interceptors.push('authErrorInterceptor');
+  }]);
 })(window, window.angular);
