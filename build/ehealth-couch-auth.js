@@ -33,8 +33,12 @@
             _db: '_session'
           }
         },
-        update: {
+        put: {
           method: 'PUT',
+          withCredentials: true
+        },
+        post: {
+          method: 'POST',
           withCredentials: true
         },
         view: {
