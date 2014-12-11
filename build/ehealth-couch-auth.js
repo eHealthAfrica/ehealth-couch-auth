@@ -87,6 +87,7 @@
 
     function set(user) {
       if (user !== self.currentUser) {
+        delete user.password;
         self.currentUser = user;
         $sessionStorage.user = user;
       }
