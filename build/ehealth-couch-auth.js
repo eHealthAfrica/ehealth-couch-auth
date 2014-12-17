@@ -124,6 +124,7 @@
 
         return couchdb.login(params).$promise.then(function(res) {
             if (res.ok) {
+              user.roles = res.roles;
               // Check next if allowed to connect to application database
               return couchdb.get({_db: couchAuth.dbName}).$promise.then(function(res) {
                 set(user);
