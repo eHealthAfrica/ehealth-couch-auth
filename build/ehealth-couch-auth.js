@@ -82,8 +82,9 @@
       success: 'auth-authenticated-success',
       failure: 'auth-authenticated-failure'
     }
-  }).factory('Auth', ['couchAuth', 'couchdb', 'AUTH_EVENTS', '$sessionStorage', '$rootScope', '$q',
-                      function Auth(couchAuth, couchdb, AUTH_EVENTS, $sessionStorage, $rootScope, $q) {
+  }).factory('Auth', [
+    'couchAuth', 'couchdb', 'AUTH_EVENTS', '$window', '$rootScope', '$q',
+    function Auth (couchAuth, couchdb, AUTH_EVENTS, $window, $rootScope, $q) {
 
     function set(user) {
       if (user !== self.currentUser) {
@@ -91,7 +92,7 @@
           delete user.password;
         }
         self.currentUser = user;
-        $sessionStorage.user = user;
+        $window.localStorage.setItem('user', user);
       }
     }
 
@@ -99,8 +100,8 @@
 
     self.currentUser = null;
 
-    if ($sessionStorage.user) {
-      set($sessionStorage.user);
+    if ($window.localStorage.getItem('user')) {
+      set($window.localStorage.getItem('user'));
     }
 
     return {
