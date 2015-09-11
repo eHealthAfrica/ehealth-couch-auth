@@ -92,7 +92,7 @@
           delete user.password;
         }
         self.currentUser = user;
-        $window.localStorage.setItem('user', user);
+        $window.localStorage.setItem('user', JSON.stringify(user));
       }
     }
 
@@ -101,7 +101,7 @@
     self.currentUser = null;
 
     if ($window.localStorage.getItem('user')) {
-      set($window.localStorage.getItem('user'));
+      set(JSON.parse($window.localStorage.getItem('user')));
     }
 
     return {
